@@ -78,7 +78,21 @@ class HualeiPlatform extends Platform
      */
     public function getTransportsByCountryCode(string $countryCode): array
     {
-        return [];
+        $uri = $this->host . "/getProductList.htm";
+        $contents = $this->client->post($uri)->getBody()->getContents();
+        $contents = mb_convert_encoding($contents, 'UTF-8', 'UTF-8,GBK,GB2312,BIG5');
+        $result =  json_decode($contents, true);
+        $transport = new Transport();
+        $transports = [];
+        foreach ($result as $value) {
+            $_transport = clone $transport;
+            $_transport->code = $value['product_id'];
+            $_transport->cnName = $value['product_shortname'];
+            $_transport->enName = $value['express_type'];
+            $_transport->data = json_encode($value, JSON_UNESCAPED_UNICODE);
+            $transports[] = $_transport;
+        }
+        return $transports;    
     }
 
     /**

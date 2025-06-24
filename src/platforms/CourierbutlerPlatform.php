@@ -90,7 +90,8 @@ class CourierbutlerPlatform extends Platform
 //            $orderResult->expressNumber = $this->getTracingNumber($resData["refrence_no"]);
             return $orderResult;
         } catch (ExpressException $exception) {
-            throw new ExpressException(sprintf("创建包裹失败: %s", $exception->getMessage()));
+		//var_dump($this->body);
+		throw new ExpressException(sprintf("创建包裹失败: %s", $exception->getMessage()));
         }
     }
 
@@ -193,8 +194,8 @@ class CourierbutlerPlatform extends Platform
             "AT", "BE", "BG", "CY", "HR", "CZ", "DK", "EE", "FI", "FR", "DE", "GR", "HU", "IE", "IT", "LV", "LT", "LU", "MT", "NL", "PL", "PT", "RO", "SK", "SI", "ES", "SE"
         ])) {
             $extraService = [[
-                "extra_servicecode" => "IO",
-                "extra_servicevalue" => $orderClass->taxesNumber
+                //"extra_servicecode" => "IO",
+                //"extra_servicevalue" => $orderClass->taxesNumber
             ]];
         }
 
@@ -237,7 +238,7 @@ class CourierbutlerPlatform extends Platform
 //                "consignee_tariff" => $orderClass->taxesNumber,
             ],
             "invoice" => $invoice,
-            "extra_service" => $extraService,
+            //"extra_service" => $extraService,
         ];
     }
 }

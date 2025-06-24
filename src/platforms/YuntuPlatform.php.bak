@@ -91,10 +91,10 @@ class YuntuPlatform extends Platform
         $api = '/api/WayBill/CreateOrder';
         $waybill = $this->formatOrder($order);
         $body = ['body' => json_encode([$waybill])];
-        Log::error("create order", $waybill);
+        Log::info("create order", $waybill);
         $response = $this->client->post($this->host . $api, $body);
         $result = $this->parseResult($response->getBody());
-        Log::error("create order result", $result);
+        Log::info("create order result", $result);
         if (!empty($result) && $result[0]['Success'] === 1) {
             $orderResult->expressAgentNumber = $result[0]['AgentNumber'];
             $orderResult->expressNumber = $result[0]['WayBillNumber'];
@@ -125,12 +125,14 @@ class YuntuPlatform extends Platform
 
         $result = $this->parseResult($response->getBody());
         Log::error("getPrintUrl", $result);
+
+
         try {
             if($result[0]['Url']){
                 return $result[0]['Url'];
             }else{
                 throw new ExpressException('获取打印地址失败', (array)$result);
-            }
+            }    
         } catch (Exception $e) {
             throw new ExpressException('获取打印地址失败', (array)$result);
         }

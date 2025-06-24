@@ -16,6 +16,7 @@ use yiier\crossBorderExpress\contracts\OrderFee;
 use yiier\crossBorderExpress\contracts\OrderResult;
 use yiier\crossBorderExpress\contracts\Transport;
 use yiier\crossBorderExpress\exceptions\ExpressException;
+use yiier\graylog\Log;
 
 class K5Platform extends Platform
 {
@@ -86,8 +87,22 @@ class K5Platform extends Platform
      */
     public function getTransportsByCountryCode(string $countryCode)
     {
-        // TODO: Implement getTransportsByCountryCode() method.
+        $result = $this->searchStartChannel();
+        $transport = new Transport();
+        $transports = [];
+        foreach ($result['returnDatas'] as $value) {
+            $_transport = clone $transport;
+            //$_transport->countryCode = $value['CountryCode'];
+            $_transport->code = $value['code'];
+            $_transport->cnName = $value['cnname'];
+            $_transport->enName = $value['enname'];
+            $_transport->ifTracking = 1;
+            $_transport->data = json_encode($value, JSON_UNESCAPED_UNICODE);
+            $transports[] = $_transport;
+        }
+        return $transports;
     }
+
 
     /**
      * @param Order $order
@@ -97,10 +112,13 @@ class K5Platform extends Platform
     public function createOrder(Order $order): OrderResult
     {
         $parameter = $this->formatOrder($order);
-        try {
+        Log::error("create order parameter", $parameter);
+
+	try {
             $result = $this->client->post($this->host . "/PostInterfaceService?method=createOrder", [
                 'body' => json_encode($parameter, true)
             ])->getBody();
+            Log::error("create order result", $result);
 
             return $this->parseResult($result);
         } catch (ExpressException $exception) {
@@ -127,13 +145,13 @@ class K5Platform extends Platform
     protected function getPrintFile(string $orderNumber, $channelCode): string
     {
 
-        $PrintPaper = $this->searchPrintPaper($channelCode);
+        //$PrintPaper = $this->searchPrintPaper($channelCode);
 
         $params = [
             'OrderType' => $this->OrderType,
             'Verify' => $this->getVerifyData(),
             'CorpBillidDatas' => [['CorpBillid' => $orderNumber]],
-            'PrintPaper' => $PrintPaper,
+	                'PrintPaper' => "label",
             'PrintContent' => 1
         ];
 
@@ -300,7 +318,8 @@ class K5Platform extends Platform
                 'Price' => $good->worth, // 单价
                 'SingleWeight' => $good->weight, // 单件重量
                 'Num' => $good->quantity, // 数量
-                'CustomsCode' => $good->hsCode
+		'CustomsCode' => $good->hsCode,
+		                'Money' => 'USD', // 申报币种
             ];
         }
 
@@ -313,7 +332,8 @@ class K5Platform extends Platform
                 'CountryCode' => $orderClass->recipient->countryCode, // 国家二字代码
                 'TotalWeight' => $orderClass->package->weight, // 订单总重量
                 'TotalValue' => $orderClass->package->declareWorth, // 订单总申报价值
-                'Number' => $orderClass->package->quantity, // 件数
+		'DeclareCurrency' => 'USD', // 申报币种
+		'Number' => $orderClass->package->quantity, // 件数
                 'Recipient' => [
                     'Name' => is_null($orderClass->recipient->name) ? '' : $orderClass->recipient->name, // 名称
                     'Company' => is_null($orderClass->recipient->company) ? '' : $orderClass->recipient->company,

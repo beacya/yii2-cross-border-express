@@ -236,8 +236,6 @@ class WanbPlatform extends Platform
         return "";
     }
 
-    
-
     /**
      * @param string $result
      * @return array
@@ -319,13 +317,11 @@ class WanbPlatform extends Platform
             ],
             'ShipperInfo' => [
                 'Taxations' => [
-                    [
-                        'TaxType' => 'IOSS',
-                        'Number' => $orderClass->taxesNumber,
-                    ],
+                    'TaxType' => 'IOSS',
+                    'Number' => $orderClass->taxesNumber,
                 ]
             ],
-            'WeightInKg' => $orderClass->package->weight,
+	    'WeightInKg' => $orderClass->package->weight,
             'ItemDetails' => $items,
             'TotalValue' => [
                 "Code" => "USD",
@@ -348,53 +344,5 @@ class WanbPlatform extends Platform
             'AutoConfirm' => true
         ];
     }
-
-    /**
-     * Query tracking points for a given tracking number.
-     *
-     * @param string $trackingNumber
-     * @return array
-     * @throws ExpressException
-     */
-    public function queryTrackPoints(string $trackingNumber): array
-    {
-        $url = sprintf("%s/api/trackPoints?trackingNumber=%s", $this->host, $trackingNumber);
-        try {
-            $response = $this->client->get($url)->getBody()->getContents();
-            $data = json_decode($response, true);
-            if (empty($data) || !isset($data['Data'])) {
-                throw new ExpressException('Failed to retrieve tracking points.');
-            }
-            return $data['Data'];
-        } catch (ExpressException $e) {
-            throw new ExpressException(sprintf("Error querying track points: %s", $e->getMessage()));
-        }
-    }
-
-    /**
-     * 修改包裹预报重量
-     *
-     * @param float $weightInKg 预报重量(单位:KG)
-     * @return array 返回处理结果
-     * @throws ExpressException
-     */
-    public function updateWeight(string $trackingNumber, float $weightInKg): array
-    {
-        $url = sprintf("%s/api/parcels/%s/customerWeight", $this->host, $trackingNumber);
-        $data = [
-            'WeightInKg' => $weightInKg,
-            'AutoConfirm' => true
-        ];
-	try {
-	 $response = $this->client->put($url, [
-                'body' => json_encode($data, true)
-            ])->getBody()->getContents();
-            return $this->parseExpress((string)$response);
-        } catch (\Exception $e) {
-            throw new ExpressException(sprintf("修改包裹预报重量失败: %s", $e->getMessage()));
-        }
-    }
-
-    
 }
 

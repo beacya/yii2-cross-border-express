@@ -104,9 +104,9 @@ class SantaiPlatform extends Platform
     {
         $orderResult = new OrderResult();
         $parameter = array_merge($this->getAuthParams(), ['addOrderRequestInfo' => $this->formatOrder($order)]);
-        Log::error("create order", $parameter);
+        Log::info("create order", $parameter);
         $result = $this->client->call('addOrder', $parameter);
-        Log::error("create order result", $result);
+        Log::info("create order result", $result);
         if (isset($result['orderActionStatus'])) {
             if ($result['orderActionStatus'] == 'Y') {
                 $orderResult->expressTrackingNumber = $result['trackingNumber'];

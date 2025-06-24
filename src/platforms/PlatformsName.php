@@ -24,4 +24,6 @@ class PlatformsName
     const K5_PLATFORM = "k5";
     const YW56_PLATFORM = "yw56";
     const HULIANTONG_PLATFORM = "huliantong";
+    const FEIA_17 = "feia"; // 一起飞
+        const FRAYUN = "frayun"; // 法运 聚能
 }
